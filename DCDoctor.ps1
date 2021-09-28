@@ -2,8 +2,12 @@ Clear-Host
 
 #START SCRIPT LOGGING SECTION - Function to output logs to screen & files. Written as a function to avoid repeading code.
 
-$LogFile = "C:\DCDoctor\DCDoctor_Results.txt" #Location of the log file which is always written.
-$ErrorLogFile = "C:\DCDoctor\DCDoctor_Error.txt" #Location of the error log file (if required).
+$logPath = "C:\DCDoctor"
+
+if (!(Test-Path -Path $logPath -ErrorAction SilentlyContinue)) { New-Item -ItemType Directory $logPath}
+
+$LogFile = "$logPath\DCDoctor_Results.txt" #Location of the log file which is always written.
+$ErrorLogFile = "$logPath\DCDoctor_Error.txt" #Location of the error log file (if required).
 
 #Remove log files to ensure clean sweep of script
 Remove-Item -Path $LogFile -Force -ErrorAction SilentlyContinue
@@ -71,6 +75,13 @@ Write-Host @"
 "@
 
 $OutputBlock = @"
+
+                          DCDoctor Diagnostic Report
+
+           Paul Rowland - https://github.com/pauljrowland/DC-Doctor
+
+                            v1.1 - 28/09/2021
+
                               -/osyhhhhyys+:.                              
                            `/yhhhhhhhhhhhhhhhy/.                           
                           :yhhhhhhhhhhhhhhhhhhhh/                          
@@ -112,12 +123,6 @@ $OutputBlock = @"
        :hhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhh.       
        +hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh:  
 
-                           DCDoctor Test Script
-
-                          Paul Rowland - (c)2021
-
-                             v1.0 - 28/09/2021
-
 "@
 
 Write-DCTestLog -logText $OutputBlock -plain #Put the above text on screen and in the log.
@@ -126,7 +131,7 @@ Write-DCTestLog -logText "Checking $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date
 
 #END BANNER
 
-#START EXCLUSION CHECK (Uncoment all lines in the EXCLUSION CHECK section if Required by removing the <# & #>)
+#START EXCLUSION CHECK (Un-coment all lines in the EXCLUSION CHECK section if Required by removing the <# & #>)
 #Check for excluded servers in the list to prevent those with known / unfixable errors from constantly logging calls
 
 #$excludedServers = "SERVER-01","SERVER02","SERVER03"
@@ -550,6 +555,7 @@ if (Test-Path $ErrorLogFile) {
     $from = "noreply@domain.com"
     $smtpServer = "smtp.server.com"
     $smtpServerPort = 587
+
     $subject = "DCDoctor Failure for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date"
  
     $eMailBody = @"
@@ -565,8 +571,7 @@ DCDoctor
  
     Write-DCTestLog -logText "Sending E-Mail Message..." -info
 
-    try { Send-MailMessage -To $to -From $from -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Priority High -Attachments $ErrorLogFile -BodyAsHtml }
-    catch { Write-DCTestLog -logText "Failed to send E-Mail (ERROR: $_)!" -fail  }
+    Send-MailMessage -To $to -From $from -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Priority High -Attachments $ErrorLogFile -BodyAsHtml
  
 }
 
