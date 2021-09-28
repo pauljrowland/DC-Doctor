@@ -53,14 +53,12 @@ function Write-DCTestLog ([string]$logText,[switch]$warn,[switch]$pass,[switch]$
 
     Write-Host $outputLogText -ForegroundColor $fgColor #Display the text on-screen if the script is being watched by a user.
 
-    #This will output to the text file(s)depending on the type. Because ConnectWise looks for an error file, there is an extra
-    #step for errors which will create a second file for the ConnectWise script to interrogate. If this file doesn't exist,
-    #ConnectWise assumes the tests have passed. If the error file does exist - ConnectWise will log a call with the contents of
-    #the error file.
+    #This will output to the text file(s)depending on the type. Once the script ha completed, there may be an erro file. If E-Mails
+    #are configured, the admin will be alerted with a copy of the report. If the error file does not exist - no E-Mail is sent.
 
     $outputLogText | Out-File -FilePath $LogFile -Append #Output the content to the log file.
 
-    if ($fail) { #Established that there is a failure. In this case, add details to the error log for ConnectWise to pickup.
+    if ($fail) { #Established that there is a failure. In this case, add details to the error log ready to be E-Mailed.
         $outputLogText | Out-File -FilePath $ErrorLogFile -Append
     }
 
@@ -80,7 +78,7 @@ $OutputBlock = @"
 
            Paul Rowland - https://github.com/pauljrowland/DCDoctor
 
-                            v1.1b - 28/09/2021
+                            v1.1c - 28/09/2021
 
                               -/osyhhhhyys+:.                              
                            `/yhhhhhhhhhhhhhhhy/.                           
@@ -132,7 +130,7 @@ Write-DCTestLog -logText "Checking $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date
 #END BANNER
 
 #START EXCLUSION CHECK (Un-coment all lines in the EXCLUSION CHECK section if Required by removing the <# & #>)
-#Check for excluded servers in the list to prevent those with known / unfixable errors from constantly logging calls
+#Check for excluded servers in the list to prevent those with known / unfixable errors from constantly sending E-Mails.
 
 #$excludedServers = "SERVER-01","SERVER02","SERVER03"
 
