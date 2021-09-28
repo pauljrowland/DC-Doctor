@@ -78,9 +78,9 @@ $OutputBlock = @"
 
                           DCDoctor Diagnostic Report
 
-           Paul Rowland - https://github.com/pauljrowland/DC-Doctor
+           Paul Rowland - https://github.com/pauljrowland/DCDoctor
 
-                            v1.1 - 28/09/2021
+                            v1.1a - 28/09/2021
 
                               -/osyhhhhyys+:.                              
                            `/yhhhhhhhhhhhhhhhy/.                           
