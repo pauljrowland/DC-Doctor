@@ -80,7 +80,7 @@ $OutputBlock = @"
 
            Paul Rowland - https://github.com/pauljrowland/DCDoctor
 
-                            v1.1a - 28/09/2021
+                            v1.1b - 28/09/2021
 
                               -/osyhhhhyys+:.                              
                            `/yhhhhhhhhhhhhhhhy/.                           
@@ -141,7 +141,7 @@ $serverName = $env:computerName
 $counter = 0
 foreach ($excludedServer in $excludedServers) { #Loop through all excluded servers
     $counter++
-    Write-Progress -Activity 'Aspire Domain Controller Checks - Checking: Excluded Servers...' -CurrentOperation $excludedServer -PercentComplete (($counter / $excludedServers.count) * 100)
+    Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Excluded Servers...' -CurrentOperation $excludedServer -PercentComplete (($counter / $excludedServers.count) * 100)
 
     if ($excludedServer -like $serverName) { #If the server is on the list - end the script
 
@@ -198,7 +198,7 @@ Write-Host @"
     $counter = 0
     ForEach ($Service in $Services) { #Loop through each service
         $counter++
-        Write-Progress -Activity 'Aspire Domain Controller Checks - Checking: Service...' -CurrentOperation $Service -PercentComplete (($counter / $Services.count) * 100)
+        Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Service...' -CurrentOperation $Service -PercentComplete (($counter / $Services.count) * 100)
 
         Write-DCTestLog -logText "Checking $Service Service" -info
 
@@ -323,7 +323,7 @@ if ($PSVersionTable.PSVersion.Major -gt 2) {#Only run if PowerShell is running a
             $FSMORole,$FSMOHolder = $FSMOHolder.split(' ')
 
             $counter++
-            Write-Progress -Activity 'Aspire Domain Controller Checks - Checking: FSMO Holder...' -CurrentOperation $FSMOHolder -PercentComplete (($counter / $FSMOHolders.count) * 100)
+            Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: FSMO Holder...' -CurrentOperation $FSMOHolder -PercentComplete (($counter / $FSMOHolders.count) * 100)
  
             Write-DCTestLog -logText "Checking $FSMORole - $FSMOHolder" -info
 
@@ -353,7 +353,7 @@ if ($PSVersionTable.PSVersion.Major -gt 2) {#Only run if PowerShell is running a
             $counter = 0
             foreach ($DomainController in $DomainControllers) {#Loop through every domain controller
                 $counter++
-                Write-Progress -Activity 'Aspire Domain Controller Checks - Checking: Domain Controller Connectivity...' -Status "Domain Controller (Domain Controller $($counter) of $($DomainControllers.count)" -CurrentOperation $DomainController -PercentComplete (($counter / $DomainControllers.count) * 100)
+                Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Domain Controller Connectivity...' -Status "Domain Controller (Domain Controller $($counter) of $($DomainControllers.count)" -CurrentOperation $DomainController -PercentComplete (($counter / $DomainControllers.count) * 100)
 
                 Write-DCTestLog -logText "Checking connection to domain controller $DomainController" -info
     
@@ -460,7 +460,7 @@ Write-Host @"
     $counter = 0
     foreach ($Error in $Errorlist) { #Loop through errors in the array
         $counter++
-        Write-Progress -Activity 'Aspire Domain Controller Checks - Checking: Event Log Errors...' -CurrentOperation $Error[1] -PercentComplete (($counter / $ErrorList.count) * 100)
+        Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Event Log Errors...' -CurrentOperation $Error[1] -PercentComplete (($counter / $ErrorList.count) * 100)
 
         #Expand the shortcuts above into full names
         if ($error[0] -eq "AD") {$LogName = "Directory Service"}
