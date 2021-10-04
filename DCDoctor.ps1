@@ -9,12 +9,12 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             2.3
+#####   Version:             2.4
 #####   Modified Date:       04/10/2021
 #####
 ########################
 
-Clear-Host
+[System.Console]::Clear()
 
 ##-START-## - IMPORT CONFIGURATION
 
@@ -40,7 +40,7 @@ if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf")) { # If the config f
 Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the content file exists, import contents.
     $var = $_.Split('=') # Split the line at the equals '=' sign into an array.
     Set-Variable -Name $var[0] -Value $var[1] -ErrorAction SilentlyContinue # Create a variable using the left of the '=' as the name and right of the '=' as the value.
-    Clear-Host
+    [System.Console]::Clear()
 }
 
 ##-END-## - Importing configuration
@@ -186,7 +186,7 @@ Write-DCTestLog -logText "DCDoctor Health Report for $env:COMPUTERNAME.$env:USER
 
 Start-Sleep -Seconds 5 # Sleep for 5 seconds
 
-Clear-Host
+[System.Console]::Clear()
 
 ##-END-## -  BANNER
 
@@ -305,7 +305,7 @@ Write-Host @"
 
     }
 
-    Clear-Host
+    [System.Console]::Clear()
 
 }
 
@@ -427,11 +427,11 @@ Performing Domain Controller connectivity and SYSVOL/NETLOGON share checks...
 
             }
 
-            Clear-Host
+            [System.Console]::Clear()
 
         }
 
-        Clear-Host
+        [System.Console]::Clear()
 
     }
 
@@ -549,7 +549,7 @@ Write-Host @"
 
         }
 
-        Clear-Host
+        [System.Console]::Clear()
 
     }
 
@@ -559,17 +559,17 @@ Write-Host @"
 
 # Call the individual functions defined above
 checkServices
-Clear-Host
+[System.Console]::Clear()
 checkDCConnectivity
-Clear-Host
+[System.Console]::Clear()
 checkEventViewer
-Clear-Host
+[System.Console]::Clear()
 
 ##-START-## - E-MAIL
 
 if (Test-Path $ErrorLogFile) { # If the error log file exists, send E-Mail if configured
 
-    Clear-Host
+    [System.Console]::Clear()
 
     if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
  
@@ -604,7 +604,7 @@ Please check $eMailErrorLogFile for more information...
 
             Start-Sleep -Seconds 10
 
-            Clear-Host
+            [System.Console]::Clear()
             
         }
     
@@ -617,6 +617,10 @@ Please check $eMailErrorLogFile for more information...
 # Complete and end script
 $date = (Get-Date -Format "dd/MM/yyy HH:mm:ss")
 Write-DCTestLog -logText "Completed test on $date" -plain
-Clear-Host
-Write-Host $logo
-Write-Host "Completed test on $date"
+[System.Console]::Clear()
+Write-Host @"
+
+Completed test on $date
+
+$logo
+"@
