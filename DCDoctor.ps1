@@ -2,33 +2,37 @@ Clear-Host
 
 ##-START-## - IMPORT CONFIGURATION
 
-# Defaults in case the configuration file is missing...
-$installPath="C:\DCDoctor"
-$sendMailReport="NO"
+$scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent # Where is the script running from?
 
-# If the configuration file exists, import variables
-if (Test-Path -Path "DCDoctor_settings.conf") {
-    Get-Content "DCDoctor_settings.conf" | Foreach-Object {
-        $var = $_.Split('=')
-        Set-Variable -Name $var[0] -Value $var[1]
-    }
+if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf")) { # If the config file doesn't exist - create it using the default file.
+
+    Copy-Item -Path "$scriptRoot\DCDoctor_settings.conf.defaults" -Destination "$scriptRoot\DCDoctor_settings.conf"
+
+}
+
+Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the content file exists, import contents.
+    $var = $_.Split('=') # Split the line at the equals '=' sign into an array.
+    Set-Variable -Name $var[0] -Value $var[1] # Create a variable using the left of the '=' as the name and right of the '=' as the value.
 }
 
 ##-END-## - Importing configuration
 
 ##-START-## - SCRIPT LOGGING SECTION - Function to output logs to screen & files. Written as a function to avoid repeading code.
 
-if (!(Test-Path -Path "$installPath" -ErrorAction SilentlyContinue)) { New-Item -ItemType Directory "$installPath"}
-if (!(Test-Path -Path "$installPath\Logs" -ErrorAction SilentlyContinue)) { New-Item -ItemType Directory "$installPath\Logs"}
+if (!(Test-Path -Path "$scriptRoot\Logs" -ErrorAction SilentlyContinue)) { # The log directory is missing.
+    
+    New-Item -ItemType Directory "$scriptRoot\Logs" # Create log directory.
 
-$LogFile = "$installPath\Logs\DCDoctor_Results.txt" # Location of the log file which is always written.
-$ErrorLogFile = "$installPath\Logs\DCDoctor_Error.txt" # Location of the error log file (if required).
-$eMailErrorLogFile = "$installPath\Logs\DCDoctor_E-Mail-Error.txt" # Location of the error log file (if required).
+}
 
+$LogFile = "$scriptRoot\Logs\DCDoctor_Results.txt" # Location of the log file which is always written.
+$ErrorLogFile = "$scriptRoot\Logs\DCDoctor_Error.txt" # Location of the error log file (if required).
+$eMailErrorLogFile = "$scriptRoot\Logs\DCDoctor_E-Mail-Error.txt" # Location of the error log file (if required).
 
 # Remove log files to ensure clean sweep of script
 Remove-Item -Path $LogFile -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $ErrorLogFile -ErrorAction SilentlyContinue
+Remove-Item -Path $eMailErrorLogFile -ErrorAction SilentlyContinue
 
 function Write-DCTestLog ([string]$logText,[switch]$warn,[switch]$pass,[switch]$fail,[switch]$plain,[switch]$info,[switch]$eMailFail) {
 
@@ -104,7 +108,7 @@ $logo = @"
                          Generated $date
 
            Paul Rowland - https://github.com/pauljrowland/DCDoctor
-                            v2.0 - 28/09/2021
+                            v2.1 - 04/10/2021
 
                               -/osyhhhhyys+:.
                             '/yhhhhhhhhhhhhhhhy/.
