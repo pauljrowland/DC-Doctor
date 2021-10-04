@@ -1,5 +1,3 @@
-Clear-Host
-
 ########################
 #####
 #####   DCDoctor
@@ -11,10 +9,12 @@ Clear-Host
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             2.2
+#####   Version:             2.3
 #####   Modified Date:       04/10/2021
 #####
 ########################
+
+Clear-Host
 
 ##-START-## - IMPORT CONFIGURATION
 
@@ -40,6 +40,7 @@ if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf")) { # If the config f
 Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the content file exists, import contents.
     $var = $_.Split('=') # Split the line at the equals '=' sign into an array.
     Set-Variable -Name $var[0] -Value $var[1] -ErrorAction SilentlyContinue # Create a variable using the left of the '=' as the name and right of the '=' as the value.
+    Clear-Host
 }
 
 ##-END-## - Importing configuration
