@@ -1,45 +1,47 @@
 # **DCDoctor**
 
-                              -/osyhhhhyys+:.                              
-                           /yhhhhhhhhhhhhhhhy/.                           
-                          :yhhhhhhhhhhhhhhhhhhhh/                          
-                       ./shhhhhhhhhhhhhhhhhhhhhhhs                        
-                      :yhhhhhhhhhhhhhhhhhhhhhhhhhhy+                      
-                     yhhhh+ohhhhhhhhhhhhhhhs+-/hhhh+                      
-                     :hhhh:  .+shhyyyyssoo+//   +hhhy                      
-                     /hhh+     .-/+ooooooo+/   .hhhy                      
-                     -hhh:            `        hhho                      
-                     yhh+                       hhh:                      
-                    ohhhy                      .hhhs+                     
-                    .hhhhh-                     /hhhhy                     
-                     :shhhs                    yhhho-                     
-                      -/hh/                   +hh/-                       
-                         /hh-                 /hh:                         
-                          +hh:              /hh:                          
-                           :yh+           .ohy-                           
-                            .ohy/.      -+hh+                            
-                              -ohhso+/+oyhy+.                              
-                                -/oooo+/-                                 
-                           `                 `                           
-                    .-/+syho                 shyo+/-.                    
-               -/oshhhhhhhhh-     /o:     /hhhhhhhhys+/-               
-             -oyhhhhys+/:.shhy    shhh+    .hhho.:/osyhhhhyo-             
-           shhhs+yh/     -hhho    /hhh-   shhy    -hh+shhho           
-           ohhh- +ho      /hhh/   shhh+   ohhh-      oho :hhh/           
-          -hhh/   -hy      +hhh: hhhhy  +hhh:  .-::/hh.   ohhh.          
-          ohhy   yh:      ohhh::hhhhh-+hhh/:syysosyho-  .hhh+          
-         hhh+     :hy       +hhhyhhhhhyhhh:+hs-` `:yh/  shhy         
-         :hhh.      oho        :yhhhhhhhhhs-+hs       -hh :hhh-         
-         ohhy       yh/        .ohhhhhhh+`ohs        .hh hhh/         
-        yhho        .yh+/:.      :yhhhs- oho         +ho   shhs         
-        .hhh:         ohhhhy.      /+:  ohs         hh-   +hhh        
-        /hhh.         ohhhhh-            -hh          /hs    -hhh-        
-        +hhh          /os+-             :hh:        yh:    .hhh/        
-        yhhs                              :oy+     `+hs      hhho        
-       yhho                                      :ssyhs      shhs        
-       .hhh/                                      -::-       ohhy       
-       :hhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhh.       
-       +hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh:  
+           Paul Rowland - https://github.com/pauljrowland/DCDoctor
+
+                              -/osyhhhhyys+:.
+                            '/yhhhhhhhhhhhhhhhy/.
+                           :yhhhhhhhhhhhhhhhhhhhh/
+                        ./shhhhhhhhhhhhhhhhhhhhhhhs
+                       :yhhhhhhhhhhhhhhhhhhhhhhhhhhy+
+                      'yhhhh+ohhhhhhhhhhhhhhhs+-/hhhh+
+                      :hhhh:  .+shhyyyyssoo+//   +hhhy
+                      /hhh+     '.-/+ooooooo+/   .hhhy
+                      -hhh:            '''        hhho
+                      'yhh+                       hhh:
+                     'ohhhy                      .hhhs+
+                     .hhhhh-                     /hhhhy
+                      :shhhs                    'yhhho-
+                       '-/hh/                   +hh/-
+                          /hh-                 /hh:
+                           +hh:              '/hh:
+                            :yh+'           .ohy-
+                             .ohy/.      '-+hh+
+                               -ohhso+/+oyhy+.
+                                 '-/oooo+/-
+                            --                 --
+                     '.-/+syho                 shyo+/-.
+                '-/oshhhhhhhhh-     '/o:'     /hhhhhhhhys+/-
+              -oyhhhhys+/:.shhy'    shhh+    .hhho.:/osyhhhhyo-
+            'shhhs+yh/     -hhho    /hhh-   'shhy'    '-hh+shhho
+            ohhh-' +ho      /hhh/   shhh+   ohhh-      oho ':hhh/
+           -hhh/   -hy'      +hhh: 'hhhhy  +hhh:  .-::/hh.   ohhh.
+           ohhy'   'yh:      'ohhh::hhhhh-+hhh/':syysosyho-  .hhh+
+          'hhh+     :hy'       +hhhyhhhhhyhhh:'+hs-'' '':yh/  shhy
+          :hhh.      oho        :yhhhhhhhhhs-'+hs'       -hh' :hhh-
+          ohhy       'yh/        .ohhhhhhh+''ohs'        .hh' 'hhh/
+         'yhho        .yh+/:.      :yhhhs- 'oho'         +ho   shhs
+         .hhh:         ohhhhy.      '/+:'  ohs'         'hh-   +hhh
+         /hhh.         ohhhhh-            -hh'          /hs    -hhh-
+         +hhh          '/os+-             :hh:'        'yh:    .hhh/
+         yhhs                              :oy+     '''+hs      hhho
+        'yhho                                      :ssyhs'      shhs
+        .hhh/                                      '-::-'       ohhy
+        :hhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhh.
+        +hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh: 
 
 This is designed to be a script which is run automatically as a scheduled task on Domain Controllers to check their integrity and log any detected issues.
 The script will always create a log, however if it finds any errors or issues - it will also create an error log and E-Mail to the user explaining the problem.
