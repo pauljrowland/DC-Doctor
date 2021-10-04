@@ -1,6 +1,6 @@
 excludedServers=
-sendMailReport=YES
-sendMailTo=username@domain.com
-sendMailFrom=noreply@domain.com
-smtpServer=smtp.server.com
-smtpServerPort=587
+sendMailReport=NO
+sendMailTo=
+sendMailFrom=
+smtpServer=
+smtpServerPort=
