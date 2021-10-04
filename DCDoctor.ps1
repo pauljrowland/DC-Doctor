@@ -9,7 +9,7 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             2.4
+#####   Version:             2.5
 #####   Modified Date:       04/10/2021
 #####
 ########################
@@ -109,7 +109,6 @@ function Write-DCTestLog ([string]$logText,[switch]$warn,[switch]$pass,[switch]$
 
     if ($fail) { # Established that there is a failure. In this case, add details to the error log ready to be E-Mailed.
         if (!(Test-Path -Path $ErrorLogFile -ErrorAction SilentlyContinue)) { # Does the error file exist? If not, make it...
-            $logo | Out-File -FilePath $ErrorLogFile -Append # Add the logo to the error log
             Write-Output "Error log for $env:COMPUTERNAME.$env:USERDNSDOMAIN`n"  | Out-File -FilePath $ErrorLogFile -Append
         }
         $outputLogText | Out-File -FilePath $ErrorLogFile -Append # Output the error content to the error log file.
@@ -575,21 +574,14 @@ if (Test-Path $ErrorLogFile) { # If the error log file exists, send E-Mail if co
  
         $subject = "DCDoctor Failure for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
  
-$eMailBody = @"
-Dear User,
-
-Please note, <b>$env:COMPUTERNAME.$env:USERDNSDOMAIN</b> has failed the DCDoctor tests on $date.
-
-Please see attached a summary of the errors.
-
-Reegards,
-DCDoctor
-"@
+        $eMailBody = "Dear User,<br /><br />Please note, <b>$env:COMPUTERNAME.$env:USERDNSDOMAIN</b> has failed the DCDoctor tests on $date.<br /><br />Please see attached a summary of the errors.<br /><br />Regards,<br />DCDoctor<br /><br />"
  
         Write-DCTestLog -logText "Sending E-Mail Message..." -info
 
         # Try to send E-Mail and alert on failure...
-        try { Send-MailMessage -To $sendMailTo -From $sendMailFrom -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Priority High -Attachments $ErrorLogFile -BodyAsHtml -ErrorAction Stop }
+        $smtpSecurePassword = ConvertTo-SecureString $smtpPassword -AsPlainText -Force
+        $smtpCredentials = New-Object System.Management.Automation.PSCredential ($smtpUsername, $smtpSecurePassword)
+        try { Send-MailMessage -To $sendMailTo -From $sendMailFrom -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Credential $smtpCredentials -Priority High -Attachments $ErrorLogFile -BodyAsHtml -ErrorAction Stop }
         catch {
             $eMailError = $_
             Write-DCTestLog -logText "Failed to send E-Mail (ERROR: $eMailError)!" -eMailfail
@@ -602,7 +594,7 @@ Please check $eMailErrorLogFile for more information...
 
 "@ -ForegroundColor Yellow -BackgroundColor Red
 
-            Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 5
 
             [System.Console]::Clear()
             
