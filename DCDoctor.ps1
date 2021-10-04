@@ -1,18 +1,45 @@
 Clear-Host
 
+########################
+#####
+#####   DCDoctor
+#####
+#####   Author:              Paul Rowland
+#####   Created:             12/07/2021
+#####   GitHub URL:          https://github.com/pauljrowland/DCDoctor
+#####   ChangeLog:           https://github.com/pauljrowland/DCDoctor/commits/main/DCDoctor.ps1
+#####   License:             GNU General Public License v3.0
+#####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
+#####
+#####   Version:             2.2
+#####   Modified Date:       04/10/2021
+#####
+########################
+
 ##-START-## - IMPORT CONFIGURATION
 
 $scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent # Where is the script running from?
 
 if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf")) { # If the config file doesn't exist - create it using the default file.
 
-    Copy-Item -Path "$scriptRoot\DCDoctor_settings.conf.defaults" -Destination "$scriptRoot\DCDoctor_settings.conf"
+    if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf.defaults")) { # Firstly, if the defaults file is missing - get a copy from GitHub..
+
+        $defaults = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/pauljrowland/DCDoctor/main/DCDoctor_Settings.conf.defaults" -ErrorAction SilentlyContinue)
+
+        Out-File -FilePath "$scriptRoot\DCDoctor_settings.conf" -InputObject $defaults.Content -ErrorAction SilentlyContinue # Create the config file.
+    }
+
+    else { # It does exist, so just copy the local version.
+
+        Copy-Item -Path "$scriptRoot\DCDoctor_settings.conf.defaults" -Destination "$scriptRoot\DCDoctor_settings.conf"
+
+    }
 
 }
 
 Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the content file exists, import contents.
     $var = $_.Split('=') # Split the line at the equals '=' sign into an array.
-    Set-Variable -Name $var[0] -Value $var[1] # Create a variable using the left of the '=' as the name and right of the '=' as the value.
+    Set-Variable -Name $var[0] -Value $var[1] -ErrorAction SilentlyContinue # Create a variable using the left of the '=' as the name and right of the '=' as the value.
 }
 
 ##-END-## - Importing configuration
@@ -108,7 +135,6 @@ $logo = @"
                          Generated $date
 
            Paul Rowland - https://github.com/pauljrowland/DCDoctor
-                            v2.1 - 04/10/2021
 
                               -/osyhhhhyys+:.
                             '/yhhhhhhhhhhhhhhhy/.
