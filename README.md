@@ -52,9 +52,8 @@ You do not need this .conf file to be present, however any changes you make with
 ## Installation Guide:
 
 1) Clone the repository to a location on your Domain Controller. For the purpose of this guide, it will be ***C:\DCDoctor***.
-2) The script will by default, log everything to the ***C:\DCDoctor\Logs*** directory. This can be changed by modifying the ***installPath*** parameter in the
-   ***DCDoctor_Settings.conf*** file. If the directory does not exist, the script will automatically create it when first run.
-3) To bypass servers, open the ***DCDoctor_Settings.conf*** file, locate and set to look like the following:
+2) The script will log everything to the same location as the script, in a subfolder called "Logs" (i.e. ***C:\DCDoctor\Logs***)
+3) To bypass servers, rename the ***DCDoctor_Settings.conf.example*** file to ***DCDoctor_Settings.conf*** (if it does not already exist) and set the following:
 *  excludedServers=SERVER1,SERVER2,SERVER3
 4) To enable E-Mail reporting, open the ***DCDoctor_Settings.conf*** file, locate and set to look like the following:
 *  sendMailReport=YES
@@ -75,5 +74,5 @@ You do not need this .conf file to be present, however any changes you make with
 *  ***Change the user to "SYSTEM"***
 *  ***Select to run whether a user is logged on or not***
 *  ***Close the task, right click and carry out a test run***
-7) You should see a text file named ***DCDcotor_Results.txt*** file with an output of the test results.
-8) If there are any errors, there will be a ***DCDoctor_Error.txt*** explaining any issues (and an E-Mail containing a copy of this file)
+7) You should see a text file named ***C:\DCDoctor\Logs\DCDcotor_Results.txt*** file with an output of the test results.
+8) If there are any errors, there will be a ***C:\DCDoctor\Logs\DCDoctor_Error.txt*** explaining any issues (and an E-Mail containing a copy of this file)
