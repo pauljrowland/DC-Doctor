@@ -1,10 +1,8 @@
 # **DCDoctor**
 
-This is designed to be a script which is run automatically as a scheduled task on Domain Controllers to check their integrity and log any detected issues.
-The script will always create a log, however if it finds any errors or issues - it will also create an error log and E-Mail to the user explaining the problem.
-
-There is a ***DCDoctor_Settings.conf*** which is placed with the ***DCDoctor.ps1***. Parameters in this fie will over-write the defaults specified in the script.
-You do not need this .conf file to be present, however any changes you make within the main script will be overwritten when you update.
+DCDoctor is designed to be run automatically as a scheduled task on Domain Controllers to check their integrity and log any detected issues, however can also be run in an Administrative PowerShell Window to achieve the same results.
+The script will always create a log file, however if it finds any errors or issues - it will create an error log and E-Mail to the user explaining the problem (if configured).
+DCDoctor requires PowerShell v2.0 however for best results - please ensure you are using at least PowerShell v5.0 as some checks will be skipped on older versions.
 
 ## Installation Guide:
 
@@ -19,10 +17,10 @@ You do not need this .conf file to be present, however any changes you make with
 *  smtpServer=smtp.server.com
 *  smtpServerPort=587
 5) To disable E-Mail reporting (default), set ***sendMailReport*** to ***NO*** or leave blank (i.e. ***sendMailReport=No*** or ***sendMailReport=***)
-6) Create a Scheduled Task to run at 1am every day, you can import the ***DCDoctor_ScheduledTask.xml*** file into the Windows Task Schduler.
+6) Create a Scheduled Task to run at 1am every day, you can import the ***DCDoctor_ScheduledTask.xml*** file into the Windows Task Scheduler.
 7) This assumes the script is in the ***C:\DCDoctor*** directory, however you can edit the task afterwards to suit your needs (script location and time etc.)
 8) You should see a text file named ***C:\DCDoctor\Logs\DCDcotor_Results.txt*** file with an output of the test results.
-9) If there are any errors, there will be a ***C:\DCDoctor\Logs\DCDoctor_Error.txt*** explaining any issues (and an E-Mail containing a copy of this file)
+9) If there are any errors, there will be a ***C:\DCDoctor\Logs\DCDoctor_Error.txt*** explaining any issues (and an E-Mail containing a copy of this file).
 
 
                               -/osyhhhhyys+:.
