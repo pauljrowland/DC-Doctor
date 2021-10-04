@@ -4,3 +4,5 @@ sendMailTo=
 sendMailFrom=
 smtpServer=
 smtpServerPort=
+smtpUserName=
+smtpPassword=
