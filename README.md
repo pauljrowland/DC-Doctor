@@ -63,6 +63,6 @@ You do not need this .conf file to be present, however any changes you make with
 *  smtpServerPort=587
 5) To disable E-Mail reporting (default), set ***sendMailReport*** to ***NO*** or leave blank (i.e. ***sendMailReport=No*** or ***sendMailReport=***)
 6) Create a Scheduled Task to run at 1am every day, you can import the ***DCDoctor_ScheduledTask.xml*** file into the Windows Task Schduler.
-7) This assumes the script is in the ***C:\DCDoctor*** directory, however you can edit the task afterwards to suit your neds (script location and time etc.)
+7) This assumes the script is in the ***C:\DCDoctor*** directory, however you can edit the task afterwards to suit your needs (script location and time etc.)
 8) You should see a text file named ***C:\DCDoctor\Logs\DCDcotor_Results.txt*** file with an output of the test results.
 9) If there are any errors, there will be a ***C:\DCDoctor\Logs\DCDoctor_Error.txt*** explaining any issues (and an E-Mail containing a copy of this file)
