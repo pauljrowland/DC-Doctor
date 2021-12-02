@@ -9,12 +9,10 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             3.1
+#####   Version:             3.1.1
 #####   Modified Date:       02/12/2021
 #####
 ########################
-
-#[System.Console]::Clear()
 
 ##-START-## - IMPORT CONFIGURATION
 
@@ -40,7 +38,7 @@ if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf")) { # If the config f
 Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the content file exists, import contents.
     $var = $_.Split('=') # Split the line at the equals '=' sign into an array.
     Set-Variable -Name $var[0] -Value $var[1] -ErrorAction SilentlyContinue # Create a variable using the left of the '=' as the name and right of the '=' as the value.
-    #[System.Console]::Clear()
+    
 }
 
 ##-END-## - Importing configuration
@@ -128,8 +126,6 @@ Write-DCTestLog -logText $logo -plain # Put the above logo on screen and in to t
 Write-DCTestLog -logText "DCDoctor Health Report for $env:COMPUTERNAME.$env:USERDNSDOMAIN" -plain # Put the PC details and date etc. into the log and on screen.
 
 Start-Sleep -Seconds 5 # Sleep for 5 seconds
-
-#[System.Console]::Clear()
 
 ##-END-## -  BANNER
 
@@ -294,7 +290,7 @@ Write-Host @"
 
     }
 
-    ##[System.Console]::Clear()
+    #
 
 }
 
@@ -411,13 +407,9 @@ Performing Domain Controller connectivity and SYSVOL/NETLOGON share checks...
                     Write-DCTestLog -logText "Partner Active Directory Domain Controller $DomainController is NOT available from $env:COMPUTERNAME!" -fail
                 }
 
-            }
-
-            #[System.Console]::Clear()
+            }    
 
         }
-
-        #[System.Console]::Clear()
 
     }
 
@@ -535,8 +527,6 @@ Write-Host @"
 
         }
 
-        #[System.Console]::Clear()
-
     }
 
 }
@@ -625,8 +615,6 @@ foreach ($domainController in $domainControllers) {
 
 if (Test-Path $ErrorLogFile) { # If the error log file exists, send E-Mail if configured
 
-    #[System.Console]::Clear()
-
     if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
  
         $subject = "DCDoctor Failure for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
@@ -653,7 +641,7 @@ Please check $eMailErrorLogFile for more information...
 
             Start-Sleep -Seconds 5
 
-            #[System.Console]::Clear()
+            
             
         }
     
@@ -666,7 +654,7 @@ Please check $eMailErrorLogFile for more information...
 # Complete and end script
 $date = (Get-Date -Format "dd/MM/yyy HH:mm:ss")
 Write-DCTestLog -logText "Completed test on $date" -plain
-#[System.Console]::Clear()
+
 Write-Host @"
 
 Completed test on $date
