@@ -9,12 +9,12 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             2.5
-#####   Modified Date:       04/10/2021
+#####   Version:             3.0
+#####   Modified Date:       02/12/2021
 #####
 ########################
 
-[System.Console]::Clear()
+#[System.Console]::Clear()
 
 ##-START-## - IMPORT CONFIGURATION
 
@@ -40,12 +40,15 @@ if (!(Test-Path -Path "$scriptRoot\DCDoctor_settings.conf")) { # If the config f
 Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the content file exists, import contents.
     $var = $_.Split('=') # Split the line at the equals '=' sign into an array.
     Set-Variable -Name $var[0] -Value $var[1] -ErrorAction SilentlyContinue # Create a variable using the left of the '=' as the name and right of the '=' as the value.
-    [System.Console]::Clear()
+    #[System.Console]::Clear()
 }
 
 ##-END-## - Importing configuration
 
 ##-START-## - SCRIPT LOGGING SECTION - Function to output logs to screen & files. Written as a function to avoid repeading code.
+
+# Import Write-DCTestLog Function
+. "$scriptRoot\SharedFunctions\Write-DCTestLog\Write-DCTestLog.ps1"
 
 if (!(Test-Path -Path "$scriptRoot\Logs" -ErrorAction SilentlyContinue)) { # The log directory is missing.
     
@@ -61,65 +64,6 @@ $eMailErrorLogFile = "$scriptRoot\Logs\DCDoctor_E-Mail-Error.txt" # Location of 
 Remove-Item -Path $LogFile -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $ErrorLogFile -ErrorAction SilentlyContinue
 Remove-Item -Path $eMailErrorLogFile -ErrorAction SilentlyContinue
-
-function Write-DCTestLog ([string]$logText,[switch]$warn,[switch]$pass,[switch]$fail,[switch]$plain,[switch]$info,[switch]$eMailFail) {
-
-    # Function to write the log file. This accepts the "logTtext" parameter which created the variable "$logText"
-    # and switches to decide the type of text to display, i.e.:
-    # Write-DCTestLog -logText "This is a warning" -warn
-
-    $date = (Get-Date -Format "dd/MM/yyy HH:mm:ss") # Get date and format for readability.
-
-    if ($pass) { # Checks passed.
-        $outputLogText = "$date   P!:   $logText`n" # Log output and add "P!:" to line.
-        $fgColor = "green" # Change colour to green.
-    }
-
-    if ($fail) { # Checks failed.
-        $outputLogText = "$date   E!:   $logText`n" # Log output and add "E!:" to line.
-        $fgColor = "red" # Change colour to red.
-    }
-
-    if ($info) { # Information line to be written.
-        $outputLogText = "$date   I!:   $logText`n" # Log output and add "I!:" to line.
-        $fgColor = "yellow"  # Change colour to yellow.
-    }
-
-    if ($warn) { # Warning line to be written.
-        $outputLogText = "$date   W!:   $logtext`n" # Log output and add "W!:" to line.
-        $fgColor = "yellow"  # Change colour to yellow.
-    }
-
-    if ($plain) { # Plain white text block.
-        $outputLogText = "$logText`n" # Text to output.
-        $fgColor = "white"  # Change colour to white.
-    }
-
-    if ($eMailfail) { # E-Mail failed to send.
-        $outputLogText = "$date   E!:   $logText`n" # Log output and add "E!:" to line.
-        $fgColor = "red" # Change colour to red.
-    }
-
-    Write-Host $outputLogText -ForegroundColor $fgColor # Display the text on-screen if the script is being watched by a user.
-
-    # This will output to the text file(s)depending on the type. Once the script ha completed, there may be an erro file. If E-Mails
-    # are configured, the admin will be alerted with a copy of the report. If the error file does not exist - no E-Mail is sent.
-
-    $outputLogText | Out-File -FilePath $LogFile -Append # Output the content to the log file.
-
-    if ($fail) { # Established that there is a failure. In this case, add details to the error log ready to be E-Mailed.
-        if (!(Test-Path -Path $ErrorLogFile -ErrorAction SilentlyContinue)) { # Does the error file exist? If not, make it...
-            Write-Output "Error log for $env:COMPUTERNAME.$env:USERDNSDOMAIN`n"  | Out-File -FilePath $ErrorLogFile -Append
-        }
-        $outputLogText | Out-File -FilePath $ErrorLogFile -Append # Output the error content to the error log file.
-    }
-
-    if ($eMailFail) { # E-Mail failed to send. Logging now in a seperate log.
-        $logo | Out-File -FilePath $eMailErrorLogFile -Append # Add the logo to the E-Mail error log
-        Write-Output "Failed to send E-Mail (ERROR: $eMailError) for $env:COMPUTERNAME.$env:USERDNSDOMAIN`n"  | Out-File -FilePath $eMailErrorLogFile -Append
-    }
-
-}
 
 ##-START-## - BANNER - Display banner at the top of the PowerShell session and log file.
 
@@ -185,7 +129,7 @@ Write-DCTestLog -logText "DCDoctor Health Report for $env:COMPUTERNAME.$env:USER
 
 Start-Sleep -Seconds 5 # Sleep for 5 seconds
 
-[System.Console]::Clear()
+#[System.Console]::Clear()
 
 ##-END-## -  BANNER
 
@@ -215,7 +159,7 @@ Write-DCTestLog -logText "Checking whether this machine is indeed an Active Dire
 # Get the return code of the domain role
 $domainRole = Get-WmiObject -Class Win32_ComputerSystem | Select-Object -ExpandProperty DomainRole
 
-if (!($domainRole -match '4|5')) { # If the domain role doesn't match '4' (PDC) or '5' (BDC (legacy)) - end the script
+if (!($domainRole -match '4|5')) { # If the domain role doesn't match '4' (PDC) or '5' (BDC) - end the script
 
     Write-DCTestLog -logText "This machine is not an Active Directory domain controller, ending test..." -info
 
@@ -229,6 +173,52 @@ if (!($domainRole -match '4|5')) { # If the domain role doesn't match '4' (PDC) 
 else { # The role does match so continue processing the script
     Write-DCTestLog -logText "This machine is an Active Directory domain controller" -pass
 }
+
+# As this script should only be run on the PDC Emulator - we need to work out what this server is
+
+Write-DCTestLog -logText "Checking PDC Emulator FMSO Role Holder..." -info
+
+$PDCEmulator = (Get-ADForest | Select-Object -ExpandProperty RootDomain | Get-ADDomain | Select-Object -Property PDCEmulator)
+
+$PDCEmulator = $PDCEmulator.PDCEmulator
+
+Write-DCTestLog -logText "The PDC Emulator has been determined to be $PDCEmulator" -info
+
+# Testing connectivity to the PDC Emulator
+
+if (Test-Connection -ComputerName $PDCEmulator -ErrorAction SilentlyContinue) {
+
+    Write-DCTestLog -logText "The PDC Emulator $PDCEmulator is available" -pass
+
+    $currentName = "$env:COMPUTERNAME.$env:USERDNSDOMAIN"
+
+    if (!($PDCEmulator -eq $currentName)) {
+
+        Write-DCTestLog -logText "This machine is not the PDC Emulator so the test will not run." -info
+        Write-DCTestLog -logText "Please check the results on $PDCEmulator for more information." -info
+
+        # Complete and end script
+        $date = (Get-Date -Format "dd/MM/yyy HH:mm:ss")
+        Write-DCTestLog -logText "Completed test on $date" -plain
+        exit
+    }
+
+}
+
+else {
+
+    Write-DCTestLog -logText "PDC Emulator $PDCEmulator is NOT available" -fail
+
+    # Complete and end script
+    $date = (Get-Date -Format "dd/MM/yyy HH:mm:ss")
+    Write-DCTestLog -logText "Completed test on $date" -plain
+    exit
+}
+
+# We have now established this is the PDC Emulator, so the test will continue.
+
+# Now we need to get a list of domain controllers in the domain...
+$domainControllers = (Get-ADDomainController -Filter "isGlobalCatalog -eq `$true")
 
 ##-END-## -  DC CHECK
 
@@ -250,7 +240,7 @@ Write-Host @"
         $counter++
         Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Service...' -CurrentOperation $Service -PercentComplete (($counter / $Services.count) * 100)
 
-        Write-DCTestLog -logText "Checking $Service Service" -info
+        Write-DCTestLog -logText "Checking $Service Service on $env:COMPUTERNAME" -info
 
         if (Get-Service -DisplayName $Service -ErrorAction SilentlyContinue) { # If the service is installed - continue to check status
 
@@ -265,7 +255,7 @@ Write-Host @"
             
                 if ($ServiceStartType -ne "Disabled") { # If the service isn't disabled, try to start it
 
-                    Write-DCTestLog -logText "$Service is not running, trying to start..." -warn
+                    Write-DCTestLog -logText "$Service is not running on $env:COMPUTERNAME:, trying to start..." -warn
 
                     # Try to start the service
                     Start-Service -DisplayName $Service
@@ -277,34 +267,34 @@ Write-Host @"
                     $ServiceStatus = (Get-Service -DisplayName $Service | Select-Object -ExpandProperty Status)
 
                     if ($ServiceStatus -ne "Running") { # If the service still isn't running - log an error
-                        Write-DCTestLog -logText "$Service failed to start and is currently $ServiceStatus with a Startup Type as $ServiceStartType" -fail
+                        Write-DCTestLog -logText "$Service failed to start and is currently $ServiceStatus with a Startup Type as $ServiceStartType on $env:COMPUTERNAME" -fail
                     }
 
                     else { # The service has now started - don't log an error
-                        Write-DCTestLog -logText "$Service has now started with a Startup Type as $ServiceStartType" -pass
+                        Write-DCTestLog -logText "$Service has now started with a Startup Type as $ServiceStartType on $env:COMPUTERNAME" -pass
                     }
 
                 }
 
                 else { # The service isn't running as it is disabled - don't log an error
-                    Write-DCTestLog -logText "$Service is currently disabled" -info
+                    Write-DCTestLog -logText "$Service is currently disabled on $env:COMPUTERNAME" -info
                 }
 
             }
 
             else  { # The service must be running - don't log an error
-                Write-DCTestLog -logText "$Service is running with a Startup Type as $ServiceStartType" -pass
+                Write-DCTestLog -logText "$Service is running with a Startup Type as $ServiceStartType on $env:COMPUTERNAME" -pass
             }
 
         }
 
         else { # The service isn't installed on the server (i.e. 'DHCP Server') - don't log an error
-            Write-DCTestLog -logText "$Service is not installed as a service on this system" -info
+            Write-DCTestLog -logText "$Service is not installed as a service on $env:COMPUTERNAME" -info
         }
 
     }
 
-    [System.Console]::Clear()
+    ##[System.Console]::Clear()
 
 }
 
@@ -324,7 +314,7 @@ Write-Host @"
 
         # Check whether the ActiveDirectory PowerShell module is installed to prevent the script failing on older DCs
 
-        Write-DCTestLog -logText "Importing Acive Directory Module..." -info
+        Write-DCTestLog -logText "Importing Acive Directory Module on $env:COMPUTERNAME..." -info
 
         if (Get-Module -ListAvailable -Name ActiveDirectory -ErrorAction SilentlyContinue) { # If the AD module is present, import it and set the $ADModuleInstalled variable to $true to ensure the function continues to run
 
@@ -334,7 +324,7 @@ Write-Host @"
             # Import the ActiveDirectory Module
             Import-Module ActiveDirectory
             
-            Write-DCTestLog -logText "Active Directory Module has been imported" -pass
+            Write-DCTestLog -logText "Active Directory Module has been imported on $env:COMPUTERNAME" -pass
 
         } 
 
@@ -343,7 +333,7 @@ Write-Host @"
             # Set the variable
             $ADModuleInstalled = $false
 
-            Write-DCTestLog -logText "Active Directory Module is not available so some tests may not run!" -warn
+            Write-DCTestLog -logText "Active Directory Module is not available so some tests may not run on $env:COMPUTERNAME!" -warn
 
         }
 
@@ -367,14 +357,14 @@ Write-Host @"
                 $counter++
                 Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: FSMO Holder...' -CurrentOperation $FSMOHolder -PercentComplete (($counter / $FSMOHolders.count) * 100)
     
-                Write-DCTestLog -logText "Checking $FSMORole - $FSMOHolder" -info
+                Write-DCTestLog -logText "Checking $FSMORole - $FSMOHolder from $env:COMPUTERNAME" -info
 
                 if (Test-Connection $FSMOHolder -Count 2 -ErrorAction SilentlyContinue) { # Connectivity was a success - don't log an error
-                    Write-DCTestLog -logText "The $FSMORole $FSMOHolder is available" -pass
+                    Write-DCTestLog -logText "The $FSMORole $FSMOHolder is available from $env:COMPUTERNAME" -pass
                 }
 
                 else { # Failed to connect - log an error
-                    Write-DCTestLog -logText "The $FSMORole $FSMOHolder is NOT available!" -fail
+                    Write-DCTestLog -logText "The $FSMORole $FSMOHolder is NOT available from $env:COMPUTERNAME!" -fail
                 }
 
             }
@@ -385,52 +375,49 @@ Performing Domain Controller connectivity and SYSVOL/NETLOGON share checks...
 
 "@
 
-            # Get a list of all listed Domain Controllers in the domain
-            $domainControllers = (Get-ADDomainController -Filter "isGlobalCatalog -eq `$true")
-
             $counter = 0
             foreach ($DomainController in $DomainControllers) { # Loop through every domain controller
                 $counter++
                 Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Domain Controller Connectivity...' -Status "Domain Controller (Domain Controller $($counter) of $($DomainControllers.count)" -CurrentOperation $DomainController -PercentComplete (($counter / $DomainControllers.count) * 100)
-                Write-DCTestLog -logText "Checking connection to domain controller $DomainController" -info
+                Write-DCTestLog -logText "Checking connection to domain controller $DomainController from $env:COMPUTERNAME" -info
                 
                 if (Test-Connection $DomainController -Count 2 -ErrorAction SilentlyContinue) { # If the domain controller is available - check SYSVOL and NETLOGON shares
 
-                    Write-DCTestLog -logText "Domain Controller $DomainController is available" -pass
+                    Write-DCTestLog -logText "Domain Controller $DomainController is available from $env:COMPUTERNAME" -pass
 
                     # SYSVOL Path
                     $SYSVOL = "\\$DomainController\SYSVOL"
 
                     if (Test-Path -Path $SYSVOL -ErrorAction SilentlyContinue) { # Connected to the SYSVOL directory correctly - don't log an error
-                        Write-DCTestLog -logText "$SYSVOL is available on $DomainController" -pass
+                        Write-DCTestLog -logText "$SYSVOL is available on $DomainController from $env:COMPUTERNAME" -pass
                     }
                     else { # SYSVOL is unavailable - log an error
-                        Write-DCTestLog -logText "$SYSVOL is NOT available on $DomainController!" -fail
+                        Write-DCTestLog -logText "$SYSVOL is NOT available on $DomainController from $env:COMPUTERNAME!" -fail
                     }
 
                     # NETLOGON Path
                     $NETLOGON = "\\$DomainController\NETLOGON"
                     
                     if (Test-Path -Path $NETLOGON -ErrorAction SilentlyContinue) { # Connected to the NETLOGON directory correctly - don't log an error
-                        Write-DCTestLog -logText "$NETLOGON is available on $DomainController" -pass
+                        Write-DCTestLog -logText "$NETLOGON is available on $DomainController from $env:COMPUTERNAME" -pass
                     }
                     else { # NETLOGON is unavailable - log an error
-                        Write-DCTestLog -logText "$NETLOGON is NOT available on $DomainController!" -fail
+                        Write-DCTestLog -logText "$NETLOGON is NOT available on $DomainController from $env:COMPUTERNAME!" -fail
                     }
                 
                 }
                 
                 else { # Domain controller listed is unavailable - log an error
-                    Write-DCTestLog -logText "Partner Active Directory Domain Controller $DomainController is NOT available!" -fail
+                    Write-DCTestLog -logText "Partner Active Directory Domain Controller $DomainController is NOT available from $env:COMPUTERNAME!" -fail
                 }
 
             }
 
-            [System.Console]::Clear()
+            #[System.Console]::Clear()
 
         }
 
-        [System.Console]::Clear()
+        #[System.Console]::Clear()
 
     }
 
@@ -475,23 +462,23 @@ function checkEventViewer {
 
 Write-Host @"
 
-    Performing Event Viewer checks...
+    Performing Event Viewer checks on $env:COMPUTERNAME...
 
 "@
 
     $counter = 0
-    foreach ($Error in $Errorlist) { # Loop through errors in the array
+    foreach ($LogError in $Errorlist) { # Loop through errors in the array
         $counter++
-        Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Event Log Errors...' -CurrentOperation $Error[1] -PercentComplete (($counter / $ErrorList.count) * 100)
+        Write-Progress -Activity 'DCDoctor Domain Controller Checks - Checking: Event Log Errors...' -CurrentOperation $LogError[1] -PercentComplete (($counter / $ErrorList.count) * 100)
 
         # Expand the shortcuts above into full names
-        if ($error[0] -eq "AD") {$LogName = "Directory Service"}
-        if ($error[0] -eq "DFS") {$LogName = "DFS Replication"}
-        if ($error[0] -eq "DNS") {$LogName = "DNS Server"}
-        if ($error[0] -eq "DHCP") {$LogName = "DHCP Server"}
+        if ($LogError[0] -eq "AD") {$LogName = "Directory Service"}
+        if ($LogError[0] -eq "DFS") {$LogName = "DFS Replication"}
+        if ($LogError[0] -eq "DNS") {$LogName = "DNS Server"}
+        if ($LogError[0] -eq "DHCP") {$LogName = "DHCP Server"}
 
-        $failureErrorID = $error[1]
-        $resolutionID = $error[2]
+        $failureErrorID = $LogError[1]
+        $resolutionID = $LogError[2]
 
         # Skip some error checks for single domain controller scenarios. One skip per line, add multiple lines if required.
         # i.e for event ID 9999
@@ -507,7 +494,7 @@ Write-Host @"
             # Get the contents of the error message
             $errorDescription = (Get-WinEvent -FilterHashtable @{Logname=$LogName;ID=$failureErrorID} -MaxEvents 1 | Select-Object -ExpandProperty Message)
 
-            Write-DCTestLog -logText "$LogName Error $failureErrorID Occurred on $errorDateString" -info
+            Write-DCTestLog -logText "$LogName Error $failureErrorID Occurred on $errorDateString on Domain Controller $env:COMPUTERNAME" -info
 
             Write-DCTestLog -logText "$errorDescription" -plain
                    
@@ -522,7 +509,7 @@ Write-Host @"
 
                 if ($resolutionDate -gt $errorDate) { # The resolution was after the latest error and has therefore cleared - don't log an error
 
-                    Write-DCTestLog -logText "$LogName Resolution Event ID $resolutionID Occurred on $resolutionDateString" -pass
+                    Write-DCTestLog -logText "$LogName Resolution Event ID $resolutionID Occurred on $resolutionDateString on Domain Controller $env:COMPUTERNAME" -pass
 
                     Write-DCTestLog -logText "$resolutionDescription" -plain
 
@@ -530,7 +517,7 @@ Write-Host @"
 
                 else { # There was a resolution as determined by this "if" - however it was before the error re-appeared - log an error
 
-                    Write-DCTestLog -logText "$LogName Error $failureErrorID has re-ocurred since it was last rectified on $resolutionDateString and is still in an errored state!" -fail
+                    Write-DCTestLog -logText "$LogName Error $failureErrorID has re-ocurred since it was last rectified on $resolutionDateString and is still in an errored state on Domain Controller $env:COMPUTERNAME!" -fail
 
                     Write-DCTestLog -logText "$errorDescription" -plain
                     
@@ -540,7 +527,7 @@ Write-Host @"
 
             else { # Because there is no resolution ID available - the error must still be and always has been present - log an error
 
-                Write-DCTestLog -logText "$LogName Error $failureErrorID has never been rectified!" -fail
+                Write-DCTestLog -logText "$LogName Error $failureErrorID has never been rectified on Domain Controller $env:COMPUTERNAME!" -fail
 
                 Write-DCTestLog -logText "$errorDescription" -plain
                 
@@ -548,7 +535,7 @@ Write-Host @"
 
         }
 
-        [System.Console]::Clear()
+        #[System.Console]::Clear()
 
     }
 
@@ -557,18 +544,85 @@ Write-Host @"
 ##-END-## -  EVENT VIEWER CHECKS 
 
 # Call the individual functions defined above
-checkServices
-[System.Console]::Clear()
-checkDCConnectivity
-[System.Console]::Clear()
-checkEventViewer
-[System.Console]::Clear()
+#checkServices
+##[System.Console]::Clear()
+#checkDCConnectivity
+##[System.Console]::Clear()
+#checkEventViewer
+##[System.Console]::Clear()
+
+foreach ($domainController in $domainControllers) {
+
+    # Check to see whether there is an old log folder. If so, delete it.
+    if (Test-Path -Path "\\$domainController\admin$\Temp\DCDoctor") { Remove-Item -path "\\$domainController\admin$\Temp\DCDoctor" -Recurse -Force}
+    
+    # Create new directory structure on the destination server
+    #New-Item -ItemType Directory -Path "\\$domainController\admin$\Temp\DCDoctor" -Force | Out-Null
+    New-Item -ItemType Directory -Path "\\$domainController\admin$\Temp\DCDoctor\Logs" -Force | Out-Null
+
+    # Copy any functions which may be required on the remote host
+    #Copy-Item -Path "$scriptRoot\SharedFunctions" -Destination "\\$domainController\admin$\Temp\DCDoctor" -Recurse -Force | Out-Null
+
+    Write-DCTestLog -logText "Checking $domainController" -info
+
+    # Start a new session to the destination DC
+    Write-DCTestLog -logText "Establising a remote session on $domainController..." -info
+    $remoteSession = New-PSSession -ComputerName $domainController
+    if ($remoteSession) { Write-DCTestLog -logText "Succesfully established a remote session on $domainController" -pass }
+    else { Write-DCTestLog -logText "Failed to establish a remote session to $domainController! Please check to see whether it is available and WinRM is running." -fail; continue }
+
+    # Import the 'Write-DCTestLog' function into the session, allowing it to be used on the remote machine.
+    Write-DCTestLog -logText "Importing 'Write-DCTestLog' function" -info
+    Invoke-Command -Session $remoteSession -FilePath "$scriptRoot\SharedFunctions\Write-DCTestLog\Write-DCTestLog.ps1"
+
+    # Redirect output of log files for the remote servers
+    Invoke-Command -Session $remoteSession -ScriptBlock {$LogFile = "C:\Windows\Temp\DCDoctor\Logs\DCDoctor_Results.txt"}
+    Invoke-Command -Session $remoteSession -ScriptBlock {$ErrorLogFile = "C:\Windows\Temp\DCDoctor\Logs\DCDoctor_Error.txt"}
+
+    # Running service Checks
+    Write-DCTestLog -logText "Running service checks on $domainController..." -info
+    Invoke-Command -Session $remoteSession -ScriptBlock ${function:checkServices}
+    Write-DCTestLog -logText "Completed Service Checks on $domainController" -info
+
+    # Running DC Checks
+    Write-DCTestLog -logText "Running Domain Controller Connectivity checks on $domainController..." -info
+    Invoke-Command -Session $remoteSession -ScriptBlock ${function:checkDCConnectivity}
+    Write-DCTestLog -logText "Completed Domain Controller Connectivity Checks on $domainController" -info
+
+    # Running Event Viewer Checks
+    Write-DCTestLog -logText "Running Event Viewer checks on $domainController..." -info
+    Invoke-Command -Session $remoteSession -ScriptBlock ${function:checkEventViewer}
+    Write-DCTestLog -logText "Completed Event Viewer Checks on $domainController" -info
+
+    # Get the contents of the remote log file to add back to the local log file.
+    $remoteLogFile = (Get-Content -Path "\\$domainController\admin$\Temp\DCDoctor\Logs\DCDoctor_Results.txt")
+
+    # Dump the contents of the remote file into the local log file
+    Write-Output $remoteLogFile | Out-File $LogFile -Append
+
+    # If there is an error log, add it to the error log locally
+    if (Test-Path "\\$domainController\admin$\Temp\DCDoctor\Logs\DCDoctor_Error.txt") {
+
+        # Get the contents of the remote error log
+        $remoteErrorLogFile = (Get-Content -path "\\$domainController\admin$\Temp\DCDoctor\Logs\DCDoctor_Error.txt")
+
+        # Dump the contents of the remote error log into the local error log
+        Write-Output $remoteErrorLogFile | Out-file $ErrorLogFile -Append
+    }
+
+    # Tidy up and remove the logs from the remote server
+    Remove-Item -path "\\$domainController\admin$\Temp\DCDoctor" -Recurse -Force
+
+    # End the Remote PS Session
+    Remove-PSSession -Session $remoteSession
+
+}
 
 ##-START-## - E-MAIL
 
 if (Test-Path $ErrorLogFile) { # If the error log file exists, send E-Mail if configured
 
-    [System.Console]::Clear()
+    #[System.Console]::Clear()
 
     if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
  
@@ -596,7 +650,7 @@ Please check $eMailErrorLogFile for more information...
 
             Start-Sleep -Seconds 5
 
-            [System.Console]::Clear()
+            #[System.Console]::Clear()
             
         }
     
@@ -609,7 +663,7 @@ Please check $eMailErrorLogFile for more information...
 # Complete and end script
 $date = (Get-Date -Format "dd/MM/yyy HH:mm:ss")
 Write-DCTestLog -logText "Completed test on $date" -plain
-[System.Console]::Clear()
+#[System.Console]::Clear()
 Write-Host @"
 
 Completed test on $date
