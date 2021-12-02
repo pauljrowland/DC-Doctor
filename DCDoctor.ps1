@@ -9,7 +9,7 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             3.0
+#####   Version:             3.1
 #####   Modified Date:       02/12/2021
 #####
 ########################
@@ -544,14 +544,17 @@ Write-Host @"
 ##-END-## -  EVENT VIEWER CHECKS 
 
 # Call the individual functions defined above
-#checkServices
-##[System.Console]::Clear()
-#checkDCConnectivity
-##[System.Console]::Clear()
-#checkEventViewer
-##[System.Console]::Clear()
 
 foreach ($domainController in $domainControllers) {
+
+    # Check to make sure the tested DC isn't being excluded...
+    if ($excludedServers.contains($domainController)) {
+
+        # The server exists in the exclude list, so break out of this
+        Write-DCTestLog -logText "$domainController has been excluded from the test. Skipping..." -info
+        continue
+
+    }
 
     # Check to see whether there is an old log folder. If so, delete it.
     if (Test-Path -Path "\\$domainController\admin$\Temp\DCDoctor") { Remove-Item -path "\\$domainController\admin$\Temp\DCDoctor" -Recurse -Force}
