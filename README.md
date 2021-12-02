@@ -1,12 +1,13 @@
 # **DCDoctor**
 
-DCDoctor is designed to be run automatically as a scheduled task on Domain Controllers to check their integrity and log any detected issues, however can also be run in an Administrative PowerShell Window to achieve the same results.
+DCDoctor is designed to be run automatically as a scheduled task on the Primary Domain Controller to check DC integrity and log any detected issues. This can also be run in an Administrative PowerShell Window to achieve the same results.
 The script will always create a log file, however if it finds any errors or issues - it will create an error log and E-Mail to the user explaining the problem (if configured).
 DCDoctor requires PowerShell v2.0 however for best results - please ensure you are using at least PowerShell v5.0 as some checks will be skipped on older versions.
+DCDoctor also requires PowerShell Remoting to be enabled on Domain Controllers.
 
 ## Installation Guide:
 
-1) Clone the repository to a location on your Domain Controller. For the purpose of this guide, it will be ***C:\DCDoctor***.
+1) Clone the repository to a location on your Primary Domain Controller. For the purpose of this guide, it will be ***C:\DCDoctor***. If you don't know the current PDC, launch an administrative command prompt and type 'netdom query fsmo'.
 2) The script will log everything to the same location as the script, in a subfolder called "Logs" (i.e. ***C:\DCDoctor\Logs***)
 3) To bypass servers, rename the ***DCDoctor_Settings.conf.example*** file to ***DCDoctor_Settings.conf*** (if it does not already exist) and set the following:
 *  excludedServers=SERVER1,SERVER2,SERVER3
