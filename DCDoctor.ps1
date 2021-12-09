@@ -9,8 +9,8 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             3.1.1
-#####   Modified Date:       02/12/2021
+#####   Version:             3.2
+#####   Modified Date:       09/12/2021
 #####
 ########################
 
@@ -123,7 +123,9 @@ $logo = @"
 
 Write-DCTestLog -logText $logo -plain # Put the above logo on screen and in to the log files.
 
-Write-DCTestLog -logText "DCDoctor Health Report for $env:COMPUTERNAME.$env:USERDNSDOMAIN" -plain # Put the PC details and date etc. into the log and on screen.
+$DNSName = [System.Net.Dns]::GetHostByName($env:computerName).HostName
+
+Write-DCTestLog -logText "DCDoctor Health Report for $DNSName" -plain # Put the PC details and date etc. into the log and on screen.
 
 Start-Sleep -Seconds 5 # Sleep for 5 seconds
 
@@ -186,9 +188,7 @@ if (Test-Connection -ComputerName $PDCEmulator -ErrorAction SilentlyContinue) {
 
     Write-DCTestLog -logText "The PDC Emulator $PDCEmulator is available" -pass
 
-    $currentName = "$env:COMPUTERNAME.$env:USERDNSDOMAIN"
-
-    if (!($PDCEmulator -eq $currentName)) {
+    if (!($PDCEmulator -eq $DNSName)) {
 
         Write-DCTestLog -logText "This machine is not the PDC Emulator so the test will not run." -info
         Write-DCTestLog -logText "Please check the results on $PDCEmulator for more information." -info
