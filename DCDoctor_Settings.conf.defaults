@@ -1,5 +1,7 @@
 excludedServers=
 sendMailReport=NO
+sendMailReportOnFail=NO
+sendMailReportOnPass=YES
 sendMailTo=
 sendMailFrom=
 smtpServer=
