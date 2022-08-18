@@ -9,8 +9,8 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             3.2
-#####   Modified Date:       09/12/2021
+#####   Version:             3.3
+#####   Modified Date:       18/08/2022
 #####
 ########################
 
@@ -40,6 +40,8 @@ Get-Content "$scriptRoot\DCDoctor_settings.conf" | Foreach-Object { # Now the co
     Set-Variable -Name $var[0] -Value $var[1] -ErrorAction SilentlyContinue # Create a variable using the left of the '=' as the name and right of the '=' as the value.
     
 }
+
+Clear-Host
 
 ##-END-## - Importing configuration
 
@@ -568,9 +570,10 @@ foreach ($domainController in $domainControllers) {
     Write-DCTestLog -logText "Importing 'Write-DCTestLog' function" -info
     Invoke-Command -Session $remoteSession -FilePath "$scriptRoot\SharedFunctions\Write-DCTestLog\Write-DCTestLog.ps1"
 
-    # Redirect output of log files for the remote servers
-    Invoke-Command -Session $remoteSession -ScriptBlock {$LogFile = "C:\Windows\Temp\DCDoctor\Logs\DCDoctor_Results.txt"}
-    Invoke-Command -Session $remoteSession -ScriptBlock {$ErrorLogFile = "C:\Windows\Temp\DCDoctor\Logs\DCDoctor_Error.txt"}
+    # Redirect output of log files for the remote servers.
+    # This writes the output of the variables to NULL, otherwise because they aren't called in the Invoke-Command script block - ISE's show a syntax error.
+    Invoke-Command -Session $remoteSession -ScriptBlock {$LogFile = "C:\Windows\Temp\DCDoctor\Logs\DCDoctor_Results.txt"; Write-Output $LogFile | Out-Null}
+    Invoke-Command -Session $remoteSession -ScriptBlock {$ErrorLogFile = "C:\Windows\Temp\DCDoctor\Logs\DCDoctor_Error.txt"; Write-Output $ErrorLogFile | Out-Null}
 
     # Running service Checks
     Write-DCTestLog -logText "Running service checks on $domainController..." -info
@@ -613,25 +616,43 @@ foreach ($domainController in $domainControllers) {
 
 ##-START-## - E-MAIL
 
-if (Test-Path $ErrorLogFile) { # If the error log file exists, send E-Mail if configured
+if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
 
-    if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
+    if ((!(Test-Path $ErrorLogFile)) -and $sendMailReportOnPass -eq "YES") { # The error file doesn't exist - therefore the tests must have passed
+
+        $subject = "DCDoctor PASS for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
  
-        $subject = "DCDoctor Failure for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
- 
+        $eMailBody = "Dear User,<br /><br />Good news, <b>$env:COMPUTERNAME.$env:USERDNSDOMAIN</b> has passed the DCDoctor tests on $date.<br /><br />Please see attached a summary of the scan for your reference.<br /><br />Regards,<br />DCDoctor<br /><br />"
+
+    }
+
+    if ((Test-Path $ErrorLogFile) -and $sendMailReportOnFail -eq "YES") { # The error file doe exist - therefore the tests must have failed at some point
+
+        $subject = "DCDoctor FAIL for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
+
         $eMailBody = "Dear User,<br /><br />Please note, <b>$env:COMPUTERNAME.$env:USERDNSDOMAIN</b> has failed the DCDoctor tests on $date.<br /><br />Please see attached a summary of the errors.<br /><br />Regards,<br />DCDoctor<br /><br />"
- 
-        Write-DCTestLog -logText "Sending E-Mail Message..." -info
 
-        # Try to send E-Mail and alert on failure...
-        $smtpSecurePassword = ConvertTo-SecureString $smtpPassword -AsPlainText -Force
-        $smtpCredentials = New-Object System.Management.Automation.PSCredential ($smtpUsername, $smtpSecurePassword)
-        try { Send-MailMessage -To $sendMailTo -From $sendMailFrom -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Credential $smtpCredentials -Priority High -Attachments $ErrorLogFile -BodyAsHtml -ErrorAction Stop }
-        catch {
-            $eMailError = $_
-            Write-DCTestLog -logText "Failed to send E-Mail (ERROR: $eMailError)!" -eMailfail
+    }
 
-            Write-Host @"
+    Write-DCTestLog -logText "Sending E-Mail Message..." -info
+
+    $smtpSecurePassword = ConvertTo-SecureString $smtpPassword -AsPlainText -Force # Convert the password in the config file to a secure string.
+
+    $smtpCredentials = New-Object System.Management.Automation.PSCredential ($smtpUsername, $smtpSecurePassword) # Assemble a variable containing the encrypted credentials.
+
+    # Try to send E-Mail alert and catch a failure...
+
+    try { Send-MailMessage -To $sendMailTo -From $sendMailFrom -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Credential $smtpCredentials -Priority High -Attachments $LogFile -BodyAsHtml -ErrorAction Stop }
+    catch {
+
+        # Get the error returned from the Send-MailMessage cmdlet.
+        $eMailError = $_
+
+        # State the reason why in the test log.
+        Write-DCTestLog -logText "Failed to send E-Mail (ERROR: $eMailError)!" -eMailfail
+
+        # Put a red warning on the PowerShell window (if being run in console mode).
+        Write-Host @"
 
 ERROR SENDING E-MAIL!!
 
@@ -639,12 +660,9 @@ Please check $eMailErrorLogFile for more information...
 
 "@ -ForegroundColor Yellow -BackgroundColor Red
 
-            Start-Sleep -Seconds 5
-
-            
-            
-        }
-    
+        # To help bring attention, pause the script for a period of time.
+        Start-Sleep -Seconds 5
+        
     }
 
 }
