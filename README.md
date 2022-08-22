@@ -9,6 +9,7 @@ DCDoctor also requires PowerShell Remoting to be enabled on Domain Controllers.
 
 1) Clone the repository to a location on your Primary Domain Controller. For the purpose of this guide, it will be ***C:\DCDoctor***. If you don't know the current PDC, launch an administrative command prompt and type 'netdom query fsmo'.
 2) The script will log everything to the same location as the script, in a subfolder called "Logs" (i.e. ***C:\DCDoctor\Logs***)
+<<<<<<< HEAD
 3) To bypass servers, rename the ***DCDoctor_Settings.conf.example*** file to ***DCDoctor_Settings.conf*** (if it does not already exist) and set the following:
  &nbsp;&nbsp;&nbsp;&nbsp;excludedServers=SERVER1,SERVER2,SERVER3
 4) To enable E-Mail reporting, open the ***DCDoctor_Settings.conf*** file, locate and set to look like the following:
@@ -19,6 +20,18 @@ DCDoctor also requires PowerShell Remoting to be enabled on Domain Controllers.
 &nbsp;&nbsp;&nbsp;&nbsp;from=noreply@example.com
 &nbsp;&nbsp;&nbsp;&nbsp;smtpServer=smtp.server.com
 &nbsp;&nbsp;&nbsp;&nbsp;smtpServerPort=587
+=======
+3) To bypass servers, rename the ***DCDoctor_Settings.conf.example*** file to ***DCDoctor_Settings.conf*** (if it does not already exist) and set the following:<br />
+	 	excludedServers=SERVER1,SERVER2,SERVER3<br />
+5) To enable E-Mail reporting, open the ***DCDoctor_Settings.conf*** file, locate and set to look like the following:<br />
+		sendMailReport=YES<br />
+		sendMailReportOnFail=YES<br />
+		sendMailReportOnPass=YES<br />
+		to=username@example.com<br />
+		from=noreply@example.com<br />
+		smtpServer=smtp.server.com<br />
+		smtpServerPort=587<br />
+>>>>>>> 9270d1084c282270423298fae5e01e72d855d9af
 5) To disable E-Mail reporting (default), set ***sendMailReport*** to ***NO*** or leave blank (i.e. ***sendMailReport=No*** or ***sendMailReport=***)
 6) Create a Scheduled Task to run at 1am every day, you can import the ***DCDoctor_ScheduledTask.xml*** file into the Windows Task Scheduler.
 7) This assumes the script is in the ***C:\DCDoctor*** directory, however you can edit the task afterwards to suit your needs (script location and time etc.)
