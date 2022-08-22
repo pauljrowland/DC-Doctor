@@ -9,7 +9,7 @@
 #####   License:             GNU General Public License v3.0
 #####   License Agreement:   https://github.com/pauljrowland/DCDoctor/blob/main/LICENSE
 #####
-#####   Version:             3.3
+#####   Version:             3.4
 #####   Modified Date:       18/08/2022
 #####
 ########################
@@ -620,18 +620,22 @@ if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
 
     if ((!(Test-Path $ErrorLogFile)) -and $sendMailReportOnPass -eq "YES") { # The error file doesn't exist - therefore the tests must have passed
 
-        $subject = "DCDoctor PASS for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
+        $eMailSubject = "DCDoctor PASS for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
  
         $eMailBody = "Dear User,<br /><br />Good news, <b>$env:COMPUTERNAME.$env:USERDNSDOMAIN</b> has passed the DCDoctor tests on $date.<br /><br />Please see attached a summary of the scan for your reference.<br /><br />Regards,<br />DCDoctor<br /><br />"
+
+        $eMailPriority = "Low"
 
     }
 
     if ((Test-Path $ErrorLogFile) -and $sendMailReportOnFail -eq "YES") { # The error file doe exist - therefore the tests must have failed at some point
 
-        $subject = "DCDoctor FAIL for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
+        $eMailSubject = "DCDoctor FAIL for $env:COMPUTERNAME.$env:USERDNSDOMAIN on $date" # E-Mail Subject
 
         $eMailBody = "Dear User,<br /><br />Please note, <b>$env:COMPUTERNAME.$env:USERDNSDOMAIN</b> has failed the DCDoctor tests on $date.<br /><br />Please see attached a summary of the errors.<br /><br />Regards,<br />DCDoctor<br /><br />"
 
+        $eMailPriority = "High"
+        
     }
 
     Write-DCTestLog -logText "Sending E-Mail Message..." -info
@@ -642,7 +646,7 @@ if ($sendMailReport -eq "YES") { # E-Mail Reporting enabled
 
     # Try to send E-Mail alert and catch a failure...
 
-    try { Send-MailMessage -To $sendMailTo -From $sendMailFrom -Subject $subject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Credential $smtpCredentials -Priority High -Attachments $LogFile -BodyAsHtml -ErrorAction Stop }
+    try { Send-MailMessage -To $sendMailTo -From $sendMailFrom -Subject $eMailSubject -Body $eMailBody -SmtpServer $smtpServer -Port $smtpServerPort -Credential $smtpCredentials -Priority $eMailPriority -Attachments $LogFile -BodyAsHtml -ErrorAction Stop }
     catch {
 
         # Get the error returned from the Send-MailMessage cmdlet.
